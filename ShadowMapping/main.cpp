@@ -443,6 +443,10 @@ int main() {
 		glBindTexture(GL_TEXTURE_2D, texShadow);
 		glUniform1i(glGetUniformLocation(mainProgram, "texShadow"), texture_unit);
 
+		glActiveTexture(GL_TEXTURE0 + 1);
+		glBindTexture(GL_TEXTURE_2D, texLight);
+		glUniform1i(glGetUniformLocation(mainProgram, "texLight"), 1);
+
 		// Set viewport size
 		glViewport(0, 0, WIDTH, HEIGHT);
 

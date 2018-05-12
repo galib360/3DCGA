@@ -7,6 +7,7 @@ layout(location = 3) uniform float time;
 
 layout(location = 4) uniform mat4 lightMVP;
 layout(location = 5) uniform vec3 lightPos;
+layout(location = 6) uniform sampler2D texLight;
 
 // Output for on-screen color
 layout(location = 0) out vec4 outColor;
@@ -63,21 +64,21 @@ void main() {
 	//stratified poisson sampling
 	//for (int i=0;i<4;i++){
 	//	int index = int(16.0*random(fragPos.xyy, i))%16;
-	//	//visibility -= 0.2*(1.0-texture( texShadow, vec3((fragLightCoord.xy + poissonDisk[index]/700.0).xy, (fragLightCoord.z-bias)/fragLightCoord.w) ));
+	//	visibility -= 0.2*(1.0-texture( texShadow, vec3((shadowMapCoord + poissonDisk[index]/700.0).xy, (fragLightCoord.z-bias)/fragLightCoord.w) ));
 	//	visibility -= 0.2 * (1.0 - texture(texShadow, vec3(shadowMapCoord + poissonDisk[index]/1000.0, (fragLightDepth-bias)/fragLightCoord.w) ));
 	//}
 
 	//poisson sampling with PCF
-	//for (int i=0;i<16;i++){
-	//	if ( texture( texShadow, shadowMapCoord + poissonDisk[i]/800.0 ).x  <  fragLightDepth-bias ){
-	//			visibility-=0.2;
-	//	}
-	//}
+	for (int i=0;i<4;i++){
+		if ( texture( texShadow, shadowMapCoord + poissonDisk[i]/800.0 ).x  <  fragLightDepth-bias ){
+				visibility-=0.2;
+		}
+	}
 
 	//general withouth any sampling
-	if(shadowMapDepth < fragLightDepth-bias){
-		visibility =0.5;
-	}
+	//if(shadowMapDepth < fragLightDepth-bias){
+	//	visibility =0.5;
+	//}
 	
 	//for spotlight
 	vec2 distancevec = fragLightCoord.xy - vec2(0.5, 0.5);
@@ -86,9 +87,12 @@ void main() {
 	
 
 	// Output the normal as color
+	// remove the if else to remove spotlight
 	if ( distance < 0.5 ){
 	//outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0); //without shadow
-    outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul; //with shadow
+    //outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul; //with shadow only
+	outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul * vec4(texture(texLight, shadowMapCoord).xy, 0.0, 0.0); // with shadow and colored light texture ex5
+	//outColor = vec4(texture(texLight, shadowMapCoord).xy, 0.0, 0.0);
 	}
 	else{
 		outColor = vec4(0,0,0,0);
