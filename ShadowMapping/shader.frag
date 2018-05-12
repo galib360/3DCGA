@@ -52,6 +52,7 @@ void main() {
 	//float bias = 0.001*tan(acos(cosTheta));
 	//bias = clamp(bias, 0.0 ,0.01);
 
+	vec4 shadowCoord = lightMVP * vec4(fragPos, 1.0);
 	vec4 fragLightCoord = lightMVP * vec4(fragPos, 1.0);
 	fragLightCoord.xyz /= fragLightCoord.w;
 	//fragLightCoord.xyz = fragLightCoord.xyz * 0.5 + 0.5;
@@ -67,20 +68,29 @@ void main() {
 	//}
 
 	//poisson sampling with PCF
-	for (int i=0;i<16;i++){
-		if ( texture( texShadow, shadowMapCoord + poissonDisk[i]/800.0 ).x  <  fragLightDepth-bias ){
-				visibility-=0.2;
-		}
-	}
-
-	//general withouth any sampling
-	//if(shadowMapDepth < fragLightDepth-bias){
-	//	visibility =0.5;
+	//for (int i=0;i<16;i++){
+	//	if ( texture( texShadow, shadowMapCoord + poissonDisk[i]/800.0 ).x  <  fragLightDepth-bias ){
+	//			visibility-=0.2;
+	//	}
 	//}
 
-	// Output the normal as color
+	//general withouth any sampling
+	if(shadowMapDepth < fragLightDepth-bias){
+		visibility =0.5;
+	}
 	
-	//outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0); //without shadow
-    outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility; //with shadow
+	//for spotlight
+	vec2 distancevec = fragLightCoord.xy - vec2(0.5, 0.5);
+	float distance = length(distancevec);
+	float lightMul = (-2* distance) + 1;
+	
 
+	// Output the normal as color
+	if ( distance < 0.5 ){
+	//outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0); //without shadow
+    outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul; //with shadow
+	}
+	else{
+		outColor = vec4(0,0,0,0);
+	}
 }
