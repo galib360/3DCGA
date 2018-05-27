@@ -8,10 +8,6 @@
 #include "traqueboule.h"
 #include "mesh.h"
 #include "grid.h"
-#include "Vertex.h"
-#include "Vec3D.h"
-#include "matrix.h"
-
 
 typedef enum {Wireframe, Flat, Gouraud} PolygonMode;
 static PolygonMode polygonMode = Gouraud;
@@ -22,7 +18,7 @@ Mesh mesh; //Main mesh
 Mesh simplified; //simplified mesh - to be built by you
 Grid grid; //voxel grid to be filled by you
 //Number of cells along an axis in the grid 
-unsigned int r = 3;
+unsigned int r = 5;
 
 bool displayGrid = false;
 bool simplifiedDisplay = false;
@@ -37,14 +33,7 @@ unsigned int H_fen = 800;  // window height
 
 /************************************************************
  * Initialization function; here we load the mesh and you can add additional precomputations
- ************************************************************/
-void init(const char * fileName){
-    mesh.loadMesh(fileName);
-	//attention! while loadMesh calls compute bounding box, it is not yet implemented!
-	
-}
-
-
+ ********************* 
 /************************************************************
  * Simplification Function !! TO BE COMPLETED
  ************************************************************/
@@ -53,41 +42,59 @@ void simplifyMesh(unsigned int r){
  //Be thorough and check all functions, as some of the calls below might NOT directly work and need to be written by you.
  //It should be considered a guideline, NOT the solution.
  //Also, use your graphics knowledge to draw for debugging! (e.g., draw the bounding box, the grid etc.)  
-
-    grid = Grid(mesh.bbOrigin, mesh.bbEdgeSize, r );
+ double offset = 0.01;	
+ Vec3Df vecOffset = Vec3Df(offset, offset, offset);
+ grid = Grid(mesh.bbOrigin-vecOffset, mesh.bbEdgeSize + 2*offset, r );
  
  //work with a local reference on the vertices and triangles
-    const vector<Vertex> & vertices = mesh.vertices;
-    const vector<Triangle> & triangles = mesh.triangles;
+ const vector<Vertex> & vertices = mesh.vertices;
+ const vector<Triangle> & triangles = mesh.triangles;
 
-    //put all the vertices in the grid
-    grid.putVertices(vertices);
+ //   //Put all the vertices in the grid
+ grid.putVertices(vertices);
 
- 	  //calculate a representative vertex for each grid cell
-    grid.computeRepresentatives();
+ //	  //calculate a representative vertex for each grid cell
+ grid.computeRepresentatives();
 
-  //create a new list of vertices for the simplified model
-  //what is the effect of the code below?
-  std::map<unsigned int, unsigned int > newindexremapping;
-  vector<Vertex> simplifiedvertices;
+ // //Create a new list of vertices for the simplified model
+ // //What is the effect of the code below?
+ std::map<unsigned int, unsigned int > newIndexRemapping;
+ vector<Vertex> simplifiedVertices;
 
     int count = 0;
     for(RepresentativeList::iterator it = grid.representatives.begin() ; it != grid.representatives.end (); it++, count++){
-        newindexremapping[(*it).first] = count;
-        simplifiedvertices.push_back((*it).second);
+        newIndexRemapping[(*it).first] = count;
+        simplifiedVertices.push_back((*it).second);
     }
 
 
-  //create a new list of triangles
-  //this is not complete and you need to add code here
-  //think about what simplifiedvertices and newindexremapping contain
-  vector<Triangle> simplifiedtriangles;
- 
-  //build the simplified mesh from the correct lists
-  simplified = Mesh(simplifiedvertices , simplifiedtriangles);
+ // //Create a new list of triangles
+ // //This is NOT COMPLETE and you need to add code here
+ // //Think about what simplifiedVertices and newIndexRemapping contain
+ vector<Triangle> simplifiedTriangles;
+ for (int i = 0; i < triangles.size(); i++) {
+	 Triangle tr = triangles[i];
+	 int indice1 = grid.isContainedAt(vertices[tr.v[0]].p);
+	 int indice2 = grid.isContainedAt(vertices[tr.v[1]].p);
+	 int indice3 = grid.isContainedAt(vertices[tr.v[2]].p);
 
-  //recalculate the normals.
-  simplified.computeVertexNormals();
+	 if (indice1 == indice2 && indice1 == indice3) {
+		 continue;
+	 }
+
+	 Triangle trSimple = Triangle(newIndexRemapping[indice1],
+		 newIndexRemapping[indice2],
+		 newIndexRemapping[indice3]);
+	 simplifiedTriangles.push_back(trSimple);
+ }
+
+ // //Build the simplified mesh from the CORRECT lists
+ simplified = Mesh(simplifiedVertices , simplifiedTriangles);
+
+ // //recalculate the normals.
+ simplified.centerAndScaleToUnit();
+ simplified.computeVertexNormals();
+ simplified.computeBoundingCube();
 }
 
 
@@ -141,18 +148,27 @@ void mainDraw( )
     if (displayGrid)
         grid.drawGrid();
 
-    return;
+	switch (type)
+	{
+	case TRIANGLE:
+		//drawAxis(1);
+		simplified.draw();
+		
+		break;
+	default:
+		drawAxis(1);
+		break;
+	}
+	return;
 
-    switch( type )
-    {
-    case TRIANGLE:
-        drawAxis(1);
-        break;
-    default:
-        drawAxis(1);
-        break;
-    }
+    
 }
+void init(const char * fileName) {
+	mesh.loadMesh(fileName);
+	//attention! while loadMesh calls compute bounding box, it is not yet implemented!
+
+}
+
 
 void animate()
 {
@@ -299,7 +315,14 @@ void keyboard(unsigned char key, int x, int y)
         }
         break;
 	case 'g':
+		simplifyMesh(r);
 		grid.drawGrid();
+		break;
+	case 'h':
+		simplifyMesh(r);
+		
+		simplified.draw();
+
 		break;
     case 27:     // ESC
         exit(0);

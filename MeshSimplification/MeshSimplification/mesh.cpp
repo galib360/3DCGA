@@ -37,10 +37,6 @@ void Mesh::computeBoundingCube () {
 	//compute extent of the mesh
 	maxPoint-=minPoint;
 	bbEdgeSize=max(max(maxPoint[0],maxPoint[1]),maxPoint[2]);
-
-	bbEdgeSizeX = maxPoint[0] + 0.2;
-	bbEdgeSizeY = maxPoint[1] + 0.2;
-	bbEdgeSizeZ = maxPoint[2] + 0.2;
 }
 
 

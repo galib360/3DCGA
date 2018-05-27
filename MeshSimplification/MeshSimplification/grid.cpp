@@ -4,30 +4,48 @@
 #endif
 #include <GL/glut.h>
 
+
 int Grid::isContainedAt(const Vec3Df & pos){
     //returns index that contains the position
-    int indice = 0;
-    return indice;
+	
+	float cubeLength = size / r;
+
+	Vec3Df v = pos - origin;
+	int x = v[0] / cubeLength;
+	int y = v[1] / cubeLength;
+	int z = v[2] / cubeLength;
+
+	int indice = x + r * y + r * r*z;
+	return indice;
+}
+
+void Grid::addToCell(const Vec3Df & vertexPos) {
+	int nr = isContainedAt(vertexPos);
+	std::vector<Vec3Df> list = verticesInCell[nr];
+	list.push_back(vertexPos);
+	verticesInCell[nr] = list;
 }
 
 void Grid::putVertices(const std::vector<Vertex> & vertices){
     //put vertices in the corresponding voxels.
-	for (auto i = 0; i < vertices.size(); ++i) {
-		//addToCell(vertices[i].p);
+	for (int i = 0; i < vertices.size(); i++) {
+		addToCell(vertices[i].p);
 	}
 }
 
 void Grid::computeRepresentatives() {
-
-}
-
-Vec3Df Grid::getRepresentative(const Vec3Df & pos) {
-
-	return Vec3Df(0,0,0);
-}
-
-void addToCell(const Vec3Df & vertexPos) {
-	CellContent cell;
+	for (int i = 0; i < r*r*r; i++) {
+		std::vector<Vec3Df> list = verticesInCell[i];
+		if (list.size() > 0) {
+			Vec3Df p = Vec3Df(0, 0, 0);
+			Vec3Df n = Vec3Df(0, 0, 0);
+			for (std::vector<Vec3Df>::iterator it = list.begin(); it != list.end(); ++it) {
+				p = p + *it;
+			}
+			p = p / list.size();
+			representatives[i] = Vertex(p, n);
+		}
+	}
 }
 
 void Grid::drawCell(const Vec3Df & Min,const Vec3Df& Max) {
@@ -59,9 +77,10 @@ void Grid::drawCell(const Vec3Df & Min,const Vec3Df& Max) {
     for (unsigned short f=0;f<6;++f)
     {
         const unsigned short* face = faceCorners[f];
-        for(unsigned int v = 0; v<4; v++)
-            glVertex3f(corners[face[v]][0], corners[face[v]][1], corners[face[v]][2]);
-
+		for (unsigned int v = 0; v < 4; v++) {
+			glColor3f(1.0f, 0.0f, 0.0f);
+			glVertex3f(corners[face[v]][0], corners[face[v]][1], corners[face[v]][2]);
+		}
     }
     glEnd();
 
@@ -70,32 +89,44 @@ void Grid::drawCell(const Vec3Df & Min,const Vec3Df& Max) {
 void Grid::drawGrid(){
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glLineWidth(1.0f);
-    glColor3f(1.0f,1.0f,0.0f);
+    glColor3f(1.0f,0.0f,0.0f);
     glDisable(GL_LIGHTING);
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
     //Complete this function by calling draw cell several times.
-	float floatR = (float)r;
+	float cubeLength = size / r;
 
-	for (float x = 0.0; x < r; x++) {
-		for (float y = 0.0; y < r; y++) {
-			for (float z = 0.0; z < r; z++) {
-				Vec3Df beginPoint = origin;
-				beginPoint[0] += sizeX * (x / floatR);
-				beginPoint[1] += sizeY * (y / floatR);
-				beginPoint[2] += sizeZ * (z / floatR);
+	for (int z = 0; z < r; z++) {
+		for (int y = 0; y < r; y++) {
+			for (int x = 0; x < r; x++) {
+				int nr = x + r * y + r * r*z;
+				if (verticesInCell[nr].size() > 0) {
+					float xmin = origin[0] + x * cubeLength;
+					float ymin = origin[1] + y * cubeLength;
+					float zmin = origin[2] + z * cubeLength;
 
-				Vec3Df endPoint = Vec3Df(x,y,z);
-				endPoint[0] += sizeX * ((x + 1.0) / floatR);
-				endPoint[1] += sizeY * ((y + 1.0) / floatR);
-				endPoint[2] += sizeZ * ((z + 1.0) / floatR);
+					float xmax = origin[0] + (x + 1) * cubeLength;
+					float ymax = origin[1] + (y + 1) * cubeLength;
+					float zmax = origin[2] + (z + 1) * cubeLength;
 
-				drawCell(beginPoint, endPoint);
+					Vec3Df min = Vec3Df();
+					min[0] = xmin;
+					min[1] = ymin;
+					min[2] = zmin;
+
+					Vec3Df max = Vec3Df();
+					max[0] = xmax;
+					max[1] = ymax;
+					max[2] = zmax;
+
+					drawCell(min, max);
+				}
 			}
 		}
 	}
 
     glPopAttrib();
 }
+
 
 

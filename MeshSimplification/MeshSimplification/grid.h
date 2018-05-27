@@ -6,7 +6,7 @@
 #include "Vertex.h"
 #include <map>
 
-typedef std::map<unsigned, std::vector<Vertex> > CellContent;
+typedef std::map<unsigned, std::vector<Vec3Df> > CellContent;
 typedef std::map<unsigned, Vertex> RepresentativeList;
 
 //The above structures can be used almost like a vector!
@@ -31,7 +31,6 @@ class Grid
 public:
     Grid(){}
     inline Grid (const Vec3Df & origin, float size, unsigned int r) : origin (origin), size(size) , r(r) {}
-	inline Grid(const Vec3Df & origin, float sizeX, float sizeY, float sizeZ, unsigned int r) : origin(origin), sizeX(sizeX), sizeY(sizeY), sizeZ(sizeZ), r(r) {}
 
 	//The corners with the smallest and largest coordinates.
     void drawCell(const Vec3Df & min,const Vec3Df& Max);
@@ -43,7 +42,6 @@ public:
 	//position of the grid (min corner is at origin and its extent is defined by size).
     Vec3Df origin;
     float size;
-	float sizeX, sizeY, sizeZ;
 	//remark: for simplicity, we work with a cube and the size/extent values are the same for all axes.
 
     //add a point to a cell

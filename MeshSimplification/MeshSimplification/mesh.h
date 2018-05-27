@@ -54,7 +54,6 @@ public:
     Vec3Df bbOrigin;
 	//extent of the bounding box (for simplicity, assumed to be the same along each axis)
     float bbEdgeSize;
-	float bbEdgeSizeX, bbEdgeSizeY, bbEdgeSizeZ;
 };
 
 #endif // MESH_H
