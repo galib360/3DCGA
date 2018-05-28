@@ -56,7 +56,7 @@
 //Use the enum values to define different rendering modes 
 //The mode is used by the function display and the mode is 
 //chosen during execution with the keys 1-9
-enum DisplayModeType {TEXTURED_QUAD=1, SURFACE=2,};
+enum DisplayModeType { TEXTURED_QUAD = 1, SURFACE = 2, };
 
 DisplayModeType DisplayMode = SURFACE;
 
@@ -64,16 +64,16 @@ unsigned int W_fen = 800;  // screen width
 unsigned int H_fen = 800;  // screen height
 
 
-//an array of texture (indices)
+						   //an array of texture (indices)
 std::vector<GLuint> Texture;
 
 //light position in the scene
-float LightPos[4] = {0,0,1,1};
+float LightPos[4] = { 10,10,10,0 };
 
 //Vertices and texture coordinates for the terrain/water
 //later you can increase NbVert* to produce a more detailed mesh
 //you should know the index face set (triangles defined by vertex indices) from the last practical assignment
-int NbVertX=3, NbVertY=3; 
+int NbVertX = 5, NbVertY = 10;
 //vertices
 std::vector<float> SurfaceVertices3f;
 //normals
@@ -84,25 +84,38 @@ std::vector<float> SurfaceColors3f;
 std::vector<float> SurfaceTexCoords2f;
 //triangle indices (three successive entries: n1, n2, n3 represent a triangle, each n* is an index representing a vertex.)
 std::vector<unsigned int> SurfaceTriangles3ui;
+//middle points of squares.
+std::vector<float> SurfaceMiddlePoints3f;
+
+
 
 
 //Declare your own global variables here:
 int myVariableThatServesNoPurpose;
-float tx=0;
-float ty=0;
+int ypos = 0;
+float tx = 0;
+float ty = 0;
 bool press = false;
+float LO = 0;
+float HI = 1;
+
+float animX = 0.0;
+float time = 0.0;
+float rotateVal = 0.0;
 
 
 ////////// Draw Functions 
 
 /**
- * Move on young padawan, may the force be with you... 
+* Move on young padawan, may the force be with you...
 */
+void initSurfaceMesh(float offsetx, float offsety, float offsetz);
+void computeShadows();
 
 void drawQuad()
 {
 	//Legends tell us that this scroll was once written by an old magician - who was a big CLARK GABLE fan!
-        //It is supposed to produce a flying checker board, but no one could figure out how the spell works... Maybe you can?
+	//It is supposed to produce a flying checker board, but no one could figure out how the spell works... Maybe you can?
 	//1) try to change the texture coordinates, what do you observe?
 	// a) try making them much smaller than 1 (e.g., 0.1)
 	// you should see pixels of the texture, try to change the Mag Filter from GL_NEAREST to GL_LINEAR
@@ -124,32 +137,32 @@ void drawQuad()
 	//4) go to initTexture and follow the instructions there - the treasure hunt continues... ;)
 
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
-	glColor3f(1,1,1);
-	glNormal3f(0,0,1);
+	glColor3f(1, 1, 1);
+	glNormal3f(0, 0, 1);
 
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,  GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,  GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,  GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,  GL_LINEAR_MIPMAP_LINEAR);
-	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
 	glBegin(GL_QUADS);
 
-		glTexCoord2f(tx,ty+10);
-		glColor3f(1,0,0);
-		glVertex2f(0,0);
-		
-		glTexCoord2f(tx+10,ty+10);
-		glColor3f(0, 1, 0);
-		glVertex2f(1,0);
+	glTexCoord2f(tx, ty + 10);
+	glColor3f(1, 0, 0);
+	glVertex2f(0, 0);
 
-		glTexCoord2f(tx+10,ty);
-		glColor3f(0, 0, 1);
-		glVertex2f(1,1);
+	glTexCoord2f(tx + 10, ty + 10);
+	glColor3f(0, 1, 0);
+	glVertex2f(1, 0);
 
-		glTexCoord2f(tx,ty);
-		glColor3f(1, 1, 0);
-		glVertex2f(0,1);
+	glTexCoord2f(tx + 10, ty);
+	glColor3f(0, 0, 1);
+	glVertex2f(1, 1);
+
+	glTexCoord2f(tx, ty);
+	glColor3f(1, 1, 0);
+	glVertex2f(0, 1);
 	glEnd();
 
 	glPopAttrib();
@@ -158,16 +171,16 @@ void drawQuad()
 
 //function that draws the light source as a sphere
 void drawLight()
-{	
+{
 	//remember all states of the GPU
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 	//deactivate the lighting state
 	glDisable(GL_LIGHTING);
 	//yellow sphere at light position
-	glColor3f(1,1,0);
+	glColor3f(1, 1, 0);
 	glPushMatrix();
-	glTranslatef(LightPos[0], LightPos[1], LightPos[2]); 
-	glutSolidSphere(0.1,6,6);
+	glTranslatef(LightPos[0], LightPos[1], LightPos[2]);
+	glutSolidSphere(0.1, 6, 6);
 	glPopMatrix();
 
 	//reset to previous state
@@ -177,36 +190,162 @@ void drawLight()
 
 
 /**
- * Animation
- */
-void animate( )
+* Animation
+*/
+void animate()
 {
-	if (press==true) {
+	if (press == true) {
 		tx += 0.1;
 		ty += 0.1;
+		for (int i = 0; i < SurfaceTexCoords2f.size(); i += 2) {
+			SurfaceTexCoords2f[i] += 0.01;
+			SurfaceTexCoords2f[i + 1] += 0.05;
+		}
+
 		press = false;
 	}
-	
+	//animX += 0.02;
+	time += 0.1;
+
+	float offset = -1.0;
+
+	for (int i = 0; i < NbVertX; i++) {
+		for (int j = 0; j < NbVertY; j++) {
+			offset++;
+
+			//define coords
+			//SurfaceVertices3f[12 * offset + 0] -= 0.1;
+			SurfaceVertices3f[12 * offset + 1] -= 0.01;
+
+
+			//SurfaceVertices3f[12 * offset + 3] -= 0.1;
+			SurfaceVertices3f[12 * offset + 4] -= 0.01;
+
+
+			//SurfaceVertices3f[12 * offset + 6] -= 0.1;
+			SurfaceVertices3f[12 * offset + 7] -= 0.01;
+
+
+			//SurfaceVertices3f[12 * offset + 9] -= 0.1;
+			SurfaceVertices3f[12 * offset + 10] -= 0.01;
+
+		}
+	}
+	if ((int)time % 60 == 0) {
+		initSurfaceMesh(-2, -2, -2);
+		computeShadows();
+	}
 	//Congratulations, you found a bottle of water...
+}
+
+
+bool isContainedIn(Vec3Df a1, Vec3Df a2, Vec3Df a3, Vec3Df a4, Vec3Df a0) {
+	float minX = min(min(min(a1[0], a2[0]), a3[0]), a4[0]);
+	float minY = min(min(min(a1[1], a2[1]), a3[1]), a4[1]);
+	float minZ = min(min(min(a1[2], a2[2]), a3[2]), a4[2]);
+
+	float maxX = max(max(max(a1[0], a2[0]), a3[0]), a4[0]);
+	float maxY = max(max(max(a1[1], a2[1]), a3[1]), a4[1]);
+	float maxZ = max(max(max(a1[2], a2[2]), a3[2]), a4[2]);
+
+	bool XIsContained = minX <= a0[0] && a0[0] <= maxX;
+	bool YIsContained = minY <= a0[1] && a0[1] <= maxY;
+	bool ZIsContained = minZ <= a0[2] && a0[2] <= maxZ;
+
+	return XIsContained && YIsContained && ZIsContained;
 }
 
 
 void computeShadows()
 {
-//function to compute shadows of the terrain
+	for (int mainIndex = 0; mainIndex < NbVertX*NbVertY; mainIndex++) {
+		// Ray testing code (TODO)
+		bool collision = false;
+		Vec3Df intersectPoint;
 
+		// Define necessary variables.
+		Vec3Df mainMiddle = Vec3Df(SurfaceMiddlePoints3f[3 * mainIndex + 0], SurfaceMiddlePoints3f[3 * mainIndex + 1], SurfaceMiddlePoints3f[3 * mainIndex + 2]);
+		Vec3Df sunPos = Vec3Df(LightPos[0], LightPos[1], LightPos[2]);
+		Vec3Df ray = mainMiddle - sunPos;
 
+		// Test ray.
+		// TODO This tests for plane intersection if the plane is infinitely long.
+		for (int index = 0; index < NbVertX*NbVertY; index++) {
+			// Define necessary variables.
+			Vec3Df a1 = Vec3Df(SurfaceVertices3f[12 * index + 0], SurfaceVertices3f[12 * index + 1], SurfaceVertices3f[12 * index + 2]);
+			Vec3Df a2 = Vec3Df(SurfaceVertices3f[12 * index + 3], SurfaceVertices3f[12 * index + 4], SurfaceVertices3f[12 * index + 5]);
+			Vec3Df a3 = Vec3Df(SurfaceVertices3f[12 * index + 6], SurfaceVertices3f[12 * index + 7], SurfaceVertices3f[12 * index + 8]);
+			Vec3Df a4 = Vec3Df(SurfaceVertices3f[12 * index + 9], SurfaceVertices3f[12 * index + 10], SurfaceVertices3f[12 * index + 11]);
+			Vec3Df aMiddle = (a1 + a2 + a3 + a4) / 4;
+			Vec3Df aNormal = Vec3Df::crossProduct(a2 - a1, a4 - a1);
+			aNormal.normalize();
+
+			//printVec3Df(ray);
+			//printVec3Df(aNormal);
+			float denom = Vec3Df::dotProduct(aNormal, ray);
+			//cout << "Denom: " << denom << "\n";
+			float distToOrigin = aMiddle.getLength();
+
+			// If plane is not perpendicular to ray:
+			if (denom > 0.0) {
+				float d = (Vec3Df::dotProduct(aMiddle - sunPos, aNormal)) / denom;
+				//cout << d << "\n";
+				if (d > 0.0 && d < 1.0) {
+					intersectPoint = sunPos + (d*ray);
+					if (isContainedIn(a1, a2, a3, a4, intersectPoint)) {
+						collision = true;
+					}
+				}
+			}
+		}
+
+		if (collision) {
+			SurfaceColors3f[12 * mainIndex + 0] = 0;
+			SurfaceColors3f[12 * mainIndex + 1] = 0;
+			SurfaceColors3f[12 * mainIndex + 2] = 0;
+
+			SurfaceColors3f[12 * mainIndex + 3] = 0;
+			SurfaceColors3f[12 * mainIndex + 4] = 0;
+			SurfaceColors3f[12 * mainIndex + 5] = 0;
+
+			SurfaceColors3f[12 * mainIndex + 6] = 0;
+			SurfaceColors3f[12 * mainIndex + 7] = 0;
+			SurfaceColors3f[12 * mainIndex + 8] = 0;
+
+			SurfaceColors3f[12 * mainIndex + 9] = 0;
+			SurfaceColors3f[12 * mainIndex + 10] = 0;
+			SurfaceColors3f[12 * mainIndex + 11] = 0;
+		}
+		else {
+			//define colors
+			SurfaceColors3f[12 * mainIndex + 0] = 1;
+			SurfaceColors3f[12 * mainIndex + 1] = 1;
+			SurfaceColors3f[12 * mainIndex + 2] = 1;
+
+			SurfaceColors3f[12 * mainIndex + 3] = 1;
+			SurfaceColors3f[12 * mainIndex + 4] = 1;
+			SurfaceColors3f[12 * mainIndex + 5] = 1;
+
+			SurfaceColors3f[12 * mainIndex + 6] = 1;
+			SurfaceColors3f[12 * mainIndex + 7] = 1;
+			SurfaceColors3f[12 * mainIndex + 8] = 1;
+
+			SurfaceColors3f[12 * mainIndex + 9] = 1;
+			SurfaceColors3f[12 * mainIndex + 10] = 1;
+			SurfaceColors3f[12 * mainIndex + 11] = 1;
+		}
+	}
 }
 
-void initSurfaceMesh()
+void initSurfaceMesh(float offsetx, float offsety, float offsetz)
 {
 	//The villagers are all counting on you!  
 	//You need to prepare the right ingredients to make your spell work and transform the simple quad into a mountainscape!
 	//This spell is only cast ONCE when the program is launched... so take your time...
-	
+
 	//Use this function to fill in the right values in the Surface*** arrays, which will represent the terrain.
 	//Below you see the current version, which is still a simple quad made out of 2x2 vertices (the default values for NbVertX, NbVertY).
-	
+
 	//1) Extend the function to support any values for NbVertX, NbVertY. 
 	//USE FOR LOOPS!!! The code below is only for illustration purposes!
 	// transform the quad into a grid of NbVertX, NbVertY that connect up to produce triangles.
@@ -214,18 +353,18 @@ void initSurfaceMesh()
 
 	//2) try modulating the z coordinate, use a cos function along the x axis to define z
 	// the resulting surface will look like a wave. 
-	
+
 	//4) After all this work, you are exhausted... take a break... you can use it to wonder why there is no number 3... 
 
 	//5) compute the correct normal values (you can do this analytically if you work with a cos function)
 	// activate the light by pressing 
-	
+
 	//6) Associate a color value based on z - cover the mountain tips in snow (white) and fill in meadows in the valleys (green).
-	
-	
+
+
 	//7) Play with more complex patterns e.g., cos(x)*sin(y) and compute the normals of this mesh 
 	//	After all the orcs will not be stopped with a simple wave...
-	
+
 	//8) The orcs still broke though, but they are afraid of light! 
 	// So start separating light and darkness: Compute a shadow value per vertex. 
 	// For this, test a ray from the vertex to the light source. 
@@ -233,255 +372,150 @@ void initSurfaceMesh()
 	// do not choose too big values for NbVertX, NbVertY, testing all intersections can be costly
 	// Please add this computation in the function compute shadows, so that it is called when the light is moved (see function keyboard).
 	//9) The orcs are coming, go to combat()...
-	
-	int nbquads = NbVertX*NbVertY;
 
+	float amtOfQuads = NbVertX * NbVertY;
 	//vertices with 3 coordinates
-	SurfaceVertices3f.resize(3*4*nbquads);
+	SurfaceVertices3f.resize(3 * 2 * 2 * amtOfQuads);
 	//normals with 3 coordinates
-	SurfaceNormals3f.resize(3*4*nbquads);
+	SurfaceNormals3f.resize(3 * 2 * 2 * amtOfQuads);
 	//texture coords per vertex
-	SurfaceTexCoords2f.resize(2*4*nbquads);
+	SurfaceTexCoords2f.resize(2 * 2 * 2 * amtOfQuads);
 	//triangles (2 per default)
-	SurfaceTriangles3ui.resize(6*nbquads);
+	SurfaceTriangles3ui.resize(3 * 2 * amtOfQuads);
 	//per vertex colors 
-	SurfaceColors3f.resize(3*4* nbquads);
-	float x = 0;
-	float y = 0;
-	float z = 0;
-	float zrand = (-0.9) + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (1.0 - (-0.9))));
-	int k = 0;
-	int l = 0;
-	int s = 0;
-	int t = -1;
-	for (y = 0; y <= NbVertY; y++)
-	{
-		x = 0;
-		s = 0;
-		t++;
-		for (x = 0; x <= NbVertX; x++)
-		{
-			z = cos(x)*sin(y);
+	SurfaceColors3f.resize(3 * 2 * 2 * amtOfQuads);
+	//middle points
+	SurfaceMiddlePoints3f.resize(3 * amtOfQuads);
 
-			SurfaceVertices3f[k] = x;
-			SurfaceVertices3f[k+1] = y;
-			SurfaceVertices3f[k+2] = z;
+	float offset = -1.0;
 
-			Vec3Df ii = Vec3Df(x, y, cos(x)*sin(y));
-			Vec3Df i1 = Vec3Df(x+1,y,cos(x+1)*sin(y+1));
-			Vec3Df i2 = Vec3Df(x - 1, y, cos(x - 1)*sin(y-1));
 
-			Vec3Df normal = Vec3Df::crossProduct(i1-ii,i2-ii);
+	for (int i = 0; i < NbVertX; i++) {
+		for (int j = 0; j < NbVertY; j++) {
+			offset++;
+			float randA = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float randB = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+			//define coords
+			SurfaceVertices3f[12 * offset + 0] = 0 + i + offsetx;
+			SurfaceVertices3f[12 * offset + 1] = 0 + j + offsety;
+			SurfaceVertices3f[12 * offset + 2] = offsetz ;
+
+			SurfaceVertices3f[12 * offset + 3] = 1 + i + offsetx;
+			SurfaceVertices3f[12 * offset + 4] = 0 + j + offsety;
+			SurfaceVertices3f[12 * offset + 5] = offsetz ;
+
+			SurfaceVertices3f[12 * offset + 6] = 1 + i + offsetx;
+			SurfaceVertices3f[12 * offset + 7] = 1 + j + offsety;
+			SurfaceVertices3f[12 * offset + 8] = offsetz ;
+
+			SurfaceVertices3f[12 * offset + 9] = 0 + i + offsetx;
+			SurfaceVertices3f[12 * offset + 10] = 1 + j + offsety;
+			SurfaceVertices3f[12 * offset + 11] = offsetz ;
+
+			// Calculate surface normal.
+			Vec3Df v1 = Vec3Df(SurfaceVertices3f[12 * offset + 0], SurfaceVertices3f[12 * offset + 1], SurfaceVertices3f[12 * offset + 2]);
+			Vec3Df v2 = Vec3Df(SurfaceVertices3f[12 * offset + 3], SurfaceVertices3f[12 * offset + 4], SurfaceVertices3f[12 * offset + 5]);
+			Vec3Df v3 = Vec3Df(SurfaceVertices3f[12 * offset + 6], SurfaceVertices3f[12 * offset + 7], SurfaceVertices3f[12 * offset + 8]);
+			Vec3Df v4 = Vec3Df(SurfaceVertices3f[12 * offset + 9], SurfaceVertices3f[12 * offset + 10], SurfaceVertices3f[12 * offset + 11]);
+			Vec3Df middle = (v1 + v2 + v3 + v4) / 4;
+
+			// Store surface middle points.
+			SurfaceMiddlePoints3f[3 * offset + 0] = middle[0];
+			SurfaceMiddlePoints3f[3 * offset + 1] = middle[1];
+			SurfaceMiddlePoints3f[3 * offset + 2] = middle[2];
+
+			Vec3Df normal = Vec3Df::crossProduct(v2 - v1, v4 - v1);
 			normal.normalize();
-			
-			SurfaceNormals3f[k] = normal[0];
-			SurfaceNormals3f[k + 1] = normal[1];
-			SurfaceNormals3f[k + 2] = normal[2];
 
-			if (SurfaceVertices3f[k + 2]> 0.3) {
-				SurfaceColors3f[k] = 1;
-				SurfaceColors3f[k + 1] = 1;
-				SurfaceColors3f[k + 2] = 1;
-			}
+			//define normals
+			SurfaceNormals3f[12 * offset + 0] = normal[0];
+			SurfaceNormals3f[12 * offset + 1] = normal[1];
+			SurfaceNormals3f[12 * offset + 2] = normal[2];
 
-			else {
-				SurfaceColors3f[k] = 0;
-				SurfaceColors3f[k + 1] = 0.6;
-				SurfaceColors3f[k + 2] = 0;
-			}
-			/*SurfaceColors3f[k] = 1;
-			SurfaceColors3f[k + 1] = 1;
-			SurfaceColors3f[k + 2] = 0.9;
-*/
-			SurfaceTexCoords2f[l] = s;
-			SurfaceTexCoords2f[l + 1] = t;
+			SurfaceNormals3f[12 * offset + 3] = normal[0];
+			SurfaceNormals3f[12 * offset + 4] = normal[1];
+			SurfaceNormals3f[12 * offset + 5] = normal[2];
 
-			s++ ;
-			k += 3;
-			l += 2;
+			SurfaceNormals3f[12 * offset + 6] = normal[0];
+			SurfaceNormals3f[12 * offset + 7] = normal[1];
+			SurfaceNormals3f[12 * offset + 8] = normal[2];
+
+			SurfaceNormals3f[12 * offset + 9] = normal[0];
+			SurfaceNormals3f[12 * offset + 10] = normal[1];
+			SurfaceNormals3f[12 * offset + 11] = normal[2];
+
+			//define colors
+			SurfaceColors3f[12 * offset + 0] = 1;
+			SurfaceColors3f[12 * offset + 1] = 1;
+			SurfaceColors3f[12 * offset + 2] = 1;
+
+			SurfaceColors3f[12 * offset + 3] = 1;
+			SurfaceColors3f[12 * offset + 4] = 1;
+			SurfaceColors3f[12 * offset + 5] = 1;
+
+			SurfaceColors3f[12 * offset + 6] = 1;
+			SurfaceColors3f[12 * offset + 7] = 1;
+			SurfaceColors3f[12 * offset + 8] = 1;
+
+			SurfaceColors3f[12 * offset + 9] = 1;
+			SurfaceColors3f[12 * offset + 10] = 1;
+			SurfaceColors3f[12 * offset + 11] = 1;
+
+			//define texcoords
+			SurfaceTexCoords2f[8 * offset + 0] = 0 + i;
+			SurfaceTexCoords2f[8 * offset + 1] = 0 + j;
+
+			SurfaceTexCoords2f[8 * offset + 2] = 1 + i;
+			SurfaceTexCoords2f[8 * offset + 3] = 0 + j;
+
+			SurfaceTexCoords2f[8 * offset + 4] = 1 + i;
+			SurfaceTexCoords2f[8 * offset + 5] = 1 + j;
+
+			SurfaceTexCoords2f[8 * offset + 6] = 0 + i;
+			SurfaceTexCoords2f[8 * offset + 7] = 1 + j;
+
+
+			//define tri indices
+			SurfaceTriangles3ui[6 * offset + 0] = 0 + 4 * offset;
+			SurfaceTriangles3ui[6 * offset + 1] = 1 + 4 * offset;
+			SurfaceTriangles3ui[6 * offset + 2] = 2 + 4 * offset;
+
+			SurfaceTriangles3ui[6 * offset + 3] = 2 + 4 * offset;
+			SurfaceTriangles3ui[6 * offset + 4] = 3 + 4 * offset;
+			SurfaceTriangles3ui[6 * offset + 5] = 0 + 4 * offset;
 		}
 	}
-	//define coords
-	/*SurfaceVertices3f[0]=0;
-	SurfaceVertices3f[1]=0;
-	SurfaceVertices3f[2]=0;
-
-	SurfaceVertices3f[3]=1;
-	SurfaceVertices3f[4]=0;
-	SurfaceVertices3f[5]=0;
-
-	SurfaceVertices3f[6]=1;
-	SurfaceVertices3f[7]=1;
-	SurfaceVertices3f[8]=0;
-
-	SurfaceVertices3f[9]=0;
-	SurfaceVertices3f[10]=1;
-	SurfaceVertices3f[11]=0;*/
-	
-	/*k = 0;
-	for (y = 0; y <= NbVertY; y++)
-	{
-		x = 0;
-		for (x = 0; x <= NbVertX; x++)
-		{
-			SurfaceNormals3f[k] = 0;
-			SurfaceNormals3f[k + 1] = 0;
-			SurfaceNormals3f[k + 2] = 1;
-			k += 3;
-		}
-	}*/
-
-	//define normals
-	/*SurfaceNormals3f[0]=0;
-	SurfaceNormals3f[1]=0;
-	SurfaceNormals3f[2]=1;
-
-	SurfaceNormals3f[3]=0;
-	SurfaceNormals3f[4]=0;
-	SurfaceNormals3f[5]=1;
-
-	SurfaceNormals3f[6]=0;
-	SurfaceNormals3f[7]=0;
-	SurfaceNormals3f[8]=1;
-
-	SurfaceNormals3f[9]=0;
-	SurfaceNormals3f[10]=0;
-	SurfaceNormals3f[11]=1;*/
-
-	/*k = 0;
-	
-	for (y = 0; y <= NbVertY; y++)
-	{
-		x = 0;
-		for (x = 0; x <= NbVertX; x++)
-		{
-			SurfaceColors3f[k] = 0;
-			SurfaceColors3f[k + 1] = 0;
-			SurfaceColors3f[k + 2] = 0.9;
-			k += 3;
-		}
-	}*/
-
-	//define colors
-	/*SurfaceColors3f[0]=0;
-	SurfaceColors3f[1]=0;
-	SurfaceColors3f[2]=1;
-
-	SurfaceColors3f[(3*NbVertY) - 3]=1;
-	SurfaceColors3f[(3*NbVertY) - 2]=0;
-	SurfaceColors3f[(3*NbVertY)-1]=1;
-
-	SurfaceColors3f[(3 * NbVertX*NbVertY) - 3]=1;
-	SurfaceColors3f[(3 * NbVertX*NbVertY) - 2]=1;
-	SurfaceColors3f[(3*NbVertX*NbVertY) - 1]=1;
-
-	int last = (3 * NbVertX*NbVertY) - 1;
-	int vx = last - ((3*NbVertX)-1);
-
-	SurfaceColors3f[vx]=0;
-	SurfaceColors3f[vx+1]=1;
-	SurfaceColors3f[vx+2]=1;*/
-
-	
-	//k = 0;
-	//float increment = 1 / NbVertX;
-	//float s = 0;
-	//float t = -increment;
-
-	//for (y = 0; y <= NbVertY; y++)
-	//{
-	//	x = 0;
-	//	t += increment;
-	//	for (x = 0; x <= NbVertX; x++)
-	//	{
-	//		SurfaceTexCoords2f[k] = s;
-	//		SurfaceTexCoords2f[k + 1] = t;
-	//		s += increment;
-	//		k += 2;
-	//	}
-	//}
-
-	//define texcoords
-	/*SurfaceTexCoords2f[0]=0;
-	SurfaceTexCoords2f[1]=0;
-
-	SurfaceTexCoords2f[(2 * NbVertX) - 2]=1;
-	SurfaceTexCoords2f[(2*NbVertX)-1]=0;
-	
-	SurfaceTexCoords2f[(2 * NbVertX * NbVertY) - 2]=1;
-	SurfaceTexCoords2f[(2 * NbVertX * NbVertY) - 1]=1;
-
-	last = (2 * NbVertX*NbVertY) - 1;
-	vx = last - ((2 * NbVertX) - 1);
-
-	SurfaceTexCoords2f[vx]=0;
-	SurfaceTexCoords2f[vx+1]=1;*/
-
-	int one = 0-2;
-	int two = 1-2;
-	int three = (NbVertX + 2)-2;
-	int four = (NbVertX+1)-2;
-	int index = 0;
-	int count = 0;
-
-	for (int j = 0; j < NbVertY; j++)
-	{
-		one += 2;
-		two += 2;
-		three += 2;
-		four += 2;
-		count = 0;
-
-		for (int i = 0; i < NbVertX; i++)
-		{
-			SurfaceTriangles3ui[index] = one;
-			SurfaceTriangles3ui[index+1] = two;
-			SurfaceTriangles3ui[index+2] = three;
-
-			SurfaceTriangles3ui[index+3] = three;
-			SurfaceTriangles3ui[index+4] = four;
-			SurfaceTriangles3ui[index+5] = one;
-			index += 6;
-			count++;
-			if (count < NbVertX) {
-				one += 1;
-				two += 1;
-				three += 1;
-				four += 1;
-			}
-			
-		}
-	}
-
-	//define tri indices
-	/*SurfaceTriangles3ui[0]=0;
-	SurfaceTriangles3ui[1]=1;
-	SurfaceTriangles3ui[2]=2;
-
-	SurfaceTriangles3ui[3]=2;
-	SurfaceTriangles3ui[4]=3;
-	SurfaceTriangles3ui[5]=0;*/
 }
 
 void drawSurface()
 {
-//This function is complete (!) and will draw the data in the Surface**** arrays.
-//You do not need to modify this one.
+	//This function is complete (!) and will draw the data in the Surface**** arrays.
+	//You do not need to modify this one.
 
-	for (int t=0; t<SurfaceTriangles3ui.size();t+=3)
+	// Make big matrix for rotation around z-axis
+
+	for (int t = 0; t<SurfaceTriangles3ui.size(); t += 3)
 	{
-
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glBegin(GL_TRIANGLES);
-		
-		for (int triVertex=0; triVertex<3;++triVertex)
-		{
-			int vIndex=SurfaceTriangles3ui[t+triVertex];
 
-			glTexCoord2fv(&(SurfaceTexCoords2f[2*vIndex]));
-			glNormal3fv(&(SurfaceNormals3f[3*vIndex]));
-			glColor3fv(&(SurfaceColors3f[3*vIndex]));
-			glVertex3fv(&(SurfaceVertices3f[3*vIndex]));
+		for (int triVertex = 0; triVertex<3; ++triVertex)
+		{
+			int vIndex = SurfaceTriangles3ui[t + triVertex];
+
+			glTexCoord2fv(&(SurfaceTexCoords2f[2 * vIndex]));
+			glNormal3fv(&(SurfaceNormals3f[3 * vIndex]));
+			glColor3fv(&(SurfaceColors3f[3 * vIndex]));
+			SurfaceVertices3f[3 * vIndex + 2] = 0.05*cos(2 * (SurfaceVertices3f[3 * vIndex] + SurfaceVertices3f[3 * vIndex + 1]) + time);
+			//SurfaceVertices3f[3 * vIndex + 2] = 0.05*cos(SurfaceVertices3f[3 * vIndex])* sin(SurfaceVertices3f[3 * vIndex + 1] * time) ;
+			glVertex3fv(&(SurfaceVertices3f[3 * vIndex]));
 		}
+
+
 		glEnd();
 	}
 }
@@ -498,18 +532,18 @@ void initTexture()
 	//	But be careful my young apprentice, you will need to traverse a desert...
 
 	Texture.resize(3);
-	Texture[0]=0;
-	Texture[1]=0;
-	Texture[2]=0;
+	Texture[0] = 0;
+	Texture[1] = 0;
+	Texture[2] = 0;
 
 	PPMImage image("checker.ppm");
 	glGenTextures(1, &Texture[0]);
 	glBindTexture(GL_TEXTURE_2D, Texture[0]);
-	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image.sizeX, image.sizeY, 
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image.sizeX, image.sizeY,
 		GL_RGB, GL_UNSIGNED_BYTE, image.data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	
+
 	PPMImage image2("brick.ppm");
 	glGenTextures(1, &Texture[1]);
 	glBindTexture(GL_TEXTURE_2D, Texture[1]);
@@ -517,7 +551,7 @@ void initTexture()
 		GL_RGB, GL_UNSIGNED_BYTE, image2.data);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	PPMImage image3("sand.ppm");
+	PPMImage image3("lava.ppm");
 	glGenTextures(1, &Texture[2]);
 	glBindTexture(GL_TEXTURE_2D, Texture[2]);
 	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, image3.sizeX, image3.sizeY,
@@ -540,19 +574,19 @@ void initTexture()
 //take keyboard input into account
 void keyboard(unsigned char key, int x, int y)
 {
-    printf("key %d pressed at %d,%d\n",key,x,y);
-    fflush(stdout);
+	printf("key %d pressed at %d,%d\n", key, x, y);
+	fflush(stdout);
 
-	if ((key>='1')&&(key<='9'))
+	if ((key >= '1') && (key <= '9'))
 	{
-		DisplayMode= (DisplayModeType) (key-'0');
+		DisplayMode = (DisplayModeType)(key - '0');
 		return;
 	}
-	
+
 	switch (key)
-    {
+	{
 	case 27:     // ESC
-        exit(0);
+		exit(0);
 	case 'L':
 		//turn lighting on
 		glEnable(GL_LIGHTING);
@@ -563,29 +597,29 @@ void keyboard(unsigned char key, int x, int y)
 		break;
 	case 'a':
 		//move light
-		LightPos[0]-=0.1;
+		LightPos[0] -= 0.1;
 		computeShadows();
 		break;
 	case 'd':
 		//move light
-		LightPos[0]+=0.1;
+		LightPos[0] += 0.1;
 		computeShadows();
 		break;
 	case 'w':
 		//move light
-		LightPos[1]+=0.1;
+		LightPos[1] += 0.1;
 		computeShadows();
 		break;
 	case 's':
 		//move light
-		LightPos[1]-=0.1;
+		LightPos[1] -= 0.1;
 		computeShadows();
 		break;
 	case 'p':
 		//move texture
 		press = true;
 		break;
-    }
+	}
 }
 
 
@@ -625,7 +659,7 @@ void keyboard(unsigned char key, int x, int y)
 
 
 
-void display( )
+void display()
 {
 	//The desert was extremely hot, if you have not collected a bottle of water on your journey, you die... and need to go back to drawQuad()
 	//and work double shifts for the graphics course...
@@ -639,7 +673,7 @@ void display( )
 	//Take a look at the case for TEXTURED_QUAD
 	//1) try activating Texture[1] instead of Texture[0] to produce brick stones - a first test for your magic tool!
 	//2) What happens if you bind the value 0?
-		
+
 	//It turns out that bricks alone are not enough. The villagers are too lazy to build the wall!!! 
 	//This is devestating!
 	//Do you remember the old spell on the drawQuad() scroll?... it created a checker board out of nothing...
@@ -653,23 +687,23 @@ void display( )
 	// now hurry... the orcs are coming...
 
 	//These two lines setup the light
-	glLightfv(GL_LIGHT0,GL_POSITION,LightPos);
+	glLightfv(GL_LIGHT0, GL_POSITION, LightPos);
 	drawLight();
 
-	switch( DisplayMode )
+	switch (DisplayMode)
 	{
 	case TEXTURED_QUAD:
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, Texture[1]);
-		drawQuad();		
-		glBindTexture(GL_TEXTURE_2D,0);
+		drawQuad();
+		glBindTexture(GL_TEXTURE_2D, 0);
 		glDisable(GL_TEXTURE_2D);
 		break;
 	default:
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, Texture[2]);
 		drawSurface();
-		glBindTexture(GL_TEXTURE_2D,0);
+		glBindTexture(GL_TEXTURE_2D, 0);
 		glDisable(GL_TEXTURE_2D);
 		break;
 	}
@@ -708,100 +742,100 @@ void displayInternal(void);
 void reshape(int w, int h);
 void init()
 {
-    glEnable( GL_LIGHTING );
-    glEnable( GL_LIGHT0 );
-    glEnable(GL_COLOR_MATERIAL);
-    glEnable(GL_NORMALIZE);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_NORMALIZE);
 
 	//int MatSpec [4] = {1,1,1,1};
- //   glMaterialiv(GL_FRONT_AND_BACK,GL_SPECULAR,MatSpec);
- //   glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,10);
+	//   glMaterialiv(GL_FRONT_AND_BACK,GL_SPECULAR,MatSpec);
+	//   glMateriali(GL_FRONT_AND_BACK,GL_SHININESS,10);
 
 
-    // Enable Depth test
-    glEnable( GL_DEPTH_TEST );
-	
+	// Enable Depth test
+	glEnable(GL_DEPTH_TEST);
+
 	//glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 	//Draw frontfacing polygons as filled
-    glPolygonMode(GL_FRONT,GL_FILL);
+	glPolygonMode(GL_FRONT, GL_FILL);
 	//draw backfacing polygons as outlined
-    glPolygonMode(GL_BACK,GL_LINE);
+	glPolygonMode(GL_BACK, GL_LINE);
 	glShadeModel(GL_SMOOTH);
-	initSurfaceMesh();
+	initSurfaceMesh(-2, -2, -2);
 	initTexture();
 }
 
 
 /**
- * Programme principal
- */
+* Programme principal
+*/
 int main(int argc, char** argv)
 {
-    glutInit(&argc, argv);
+	glutInit(&argc, argv);
 
-    // couches du framebuffer utilisees par l'application
-    glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
+	// couches du framebuffer utilisees par l'application
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 
-    // position et taille de la fenetre
-    glutInitWindowPosition(200, 100);
-    glutInitWindowSize(W_fen,H_fen);
-    glutCreateWindow(argv[0]);
+	// position et taille de la fenetre
+	glutInitWindowPosition(200, 100);
+	glutInitWindowSize(W_fen, H_fen);
+	glutCreateWindow(argv[0]);
 
-    init( );
-	
-    // Initialize viewpoint
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0,0,-4);
-    tbInitTransform();     
-    tbHelp();
-         
-    
+	init();
+
+	// Initialize viewpoint
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glTranslatef(0, 0, -4);
+	tbInitTransform();
+	tbHelp();
+
+
 
 	// cablage des callback
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glutDisplayFunc(displayInternal);
-    glutMouseFunc(tbMouseFunc);    // traqueboule utilise la souris
-    glutMotionFunc(tbMotionFunc);  // traqueboule utilise la souris
-    glutIdleFunc(animate);
+	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
+	glutDisplayFunc(displayInternal);
+	glutMouseFunc(tbMouseFunc);    // traqueboule utilise la souris
+	glutMotionFunc(tbMotionFunc);  // traqueboule utilise la souris
+	glutIdleFunc(animate);
 
-    // lancement de la boucle principale
-    glutMainLoop();
-    
-    return 0;  // instruction jamais exécutée
+	// lancement de la boucle principale
+	glutMainLoop();
+
+	return 0;  // instruction jamais exécutée
 }
 
 /**
- * Fonctions de gestion opengl à ne pas toucher
- */
+* Fonctions de gestion opengl à ne pas toucher
+*/
 // Actions d'affichage
 // Ne pas changer
 void displayInternal(void)
 {
-    // Effacer tout
-    glClearColor (0.0, 0.0, 0.0, 0.0);
-    glClear( GL_COLOR_BUFFER_BIT  | GL_DEPTH_BUFFER_BIT); // la couleur et le z
-    
+	// Effacer tout
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // la couleur et le z
 
-    glLoadIdentity();  // repere camera
 
-    tbVisuTransform(); // origine et orientation de la scene
+	glLoadIdentity();  // repere camera
 
-    display( );    
+	tbVisuTransform(); // origine et orientation de la scene
 
-    glutSwapBuffers();
-    glutPostRedisplay();
+	display();
+
+	glutSwapBuffers();
+	glutPostRedisplay();
 }
 // pour changement de taille ou desiconification
 void reshape(int w, int h)
 {
-    glViewport(0, 0, (GLsizei) w, (GLsizei) h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    //glOrtho (-1.1, 1.1, -1.1,1.1, -1000.0, 1000.0);
-    gluPerspective (50, (float)w/h, 1, 10);
-    glMatrixMode(GL_MODELVIEW);
+	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	//glOrtho (-1.1, 1.1, -1.1,1.1, -1000.0, 1000.0);
+	gluPerspective(50, (float)w / h, 1, 10);
+	glMatrixMode(GL_MODELVIEW);
 }
 

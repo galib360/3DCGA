@@ -3,14 +3,100 @@ c:\users\injam\desktop\github\3dcga\texture\texture\trackball.h(13): warning C43
 c:\users\injam\desktop\github\3dcga\texture\texture\trackball.h(117): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 c:\users\injam\desktop\github\3dcga\texture\texture\trackball.h(140): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
 c:\users\injam\desktop\github\3dcga\texture\texture\trackball.h(172): warning C4244: 'argument': conversion from 'double' to 'GLfloat', possible loss of data
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(185): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(186): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(252): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(289): warning C4305: '=': truncation from 'double' to 'float'
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(296): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(297): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(566): warning C4305: '-=': truncation from 'double' to 'float'
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(571): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(576): warning C4305: '+=': truncation from 'double' to 'float'
-c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(581): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(198): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(199): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(201): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(202): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(208): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(218): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(218): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(222): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(222): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(226): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(226): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(230): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(230): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(376): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(378): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(380): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(382): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(384): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(386): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(388): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(400): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(401): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(402): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(404): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(405): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(406): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(408): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(409): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(410): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(412): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(413): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(414): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(417): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(418): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(419): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(420): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(424): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(425): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(426): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(432): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(433): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(434): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(436): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(437): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(438): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(440): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(441): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(442): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(444): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(445): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(446): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(449): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(450): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(451): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(453): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(454): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(455): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(457): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(458): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(459): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(461): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(462): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(463): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(466): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(466): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(467): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(467): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(469): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(469): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(470): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(470): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(472): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(472): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(473): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(473): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(475): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(475): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(476): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(476): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(480): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(480): warning C4244: '=': conversion from 'float' to 'GLuint', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(481): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(481): warning C4244: '=': conversion from 'float' to 'GLuint', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(482): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(482): warning C4244: '=': conversion from 'float' to 'GLuint', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(484): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(484): warning C4244: '=': conversion from 'float' to 'GLuint', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(485): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(485): warning C4244: '=': conversion from 'float' to 'GLuint', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(486): warning C4244: 'argument': conversion from 'float' to 'const unsigned __int64', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(486): warning C4244: '=': conversion from 'float' to 'GLuint', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(513): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(600): warning C4305: '-=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(605): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(610): warning C4305: '+=': truncation from 'double' to 'float'
+c:\users\injam\desktop\github\3dcga\texture\texture\main.cpp(615): warning C4305: '-=': truncation from 'double' to 'float'
   Texture.vcxproj -> C:\Users\injam\Desktop\GitHub\3DCGA\Texture\x64\Debug\Texture.exe
