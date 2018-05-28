@@ -18,7 +18,7 @@ Mesh mesh; //Main mesh
 Mesh simplified; //simplified mesh - to be built by you
 Grid grid; //voxel grid to be filled by you
 //Number of cells along an axis in the grid 
-unsigned int r = 5;
+unsigned int r = 30;
 
 bool displayGrid = false;
 bool simplifiedDisplay = false;
@@ -37,65 +37,7 @@ unsigned int H_fen = 800;  // window height
 /************************************************************
  * Simplification Function !! TO BE COMPLETED
  ************************************************************/
-void simplifyMesh(unsigned int r){
- //Create a grid that covers the bounding box of the mesh. 
- //Be thorough and check all functions, as some of the calls below might NOT directly work and need to be written by you.
- //It should be considered a guideline, NOT the solution.
- //Also, use your graphics knowledge to draw for debugging! (e.g., draw the bounding box, the grid etc.)  
- double offset = 0.01;	
- Vec3Df vecOffset = Vec3Df(offset, offset, offset);
- grid = Grid(mesh.bbOrigin-vecOffset, mesh.bbEdgeSize + 2*offset, r );
- 
- //work with a local reference on the vertices and triangles
- const vector<Vertex> & vertices = mesh.vertices;
- const vector<Triangle> & triangles = mesh.triangles;
 
- //   //Put all the vertices in the grid
- grid.putVertices(vertices);
-
- //	  //calculate a representative vertex for each grid cell
- grid.computeRepresentatives();
-
- // //Create a new list of vertices for the simplified model
- // //What is the effect of the code below?
- std::map<unsigned int, unsigned int > newIndexRemapping;
- vector<Vertex> simplifiedVertices;
-
-    int count = 0;
-    for(RepresentativeList::iterator it = grid.representatives.begin() ; it != grid.representatives.end (); it++, count++){
-        newIndexRemapping[(*it).first] = count;
-        simplifiedVertices.push_back((*it).second);
-    }
-
-
- // //Create a new list of triangles
- // //This is NOT COMPLETE and you need to add code here
- // //Think about what simplifiedVertices and newIndexRemapping contain
- vector<Triangle> simplifiedTriangles;
- for (int i = 0; i < triangles.size(); i++) {
-	 Triangle tr = triangles[i];
-	 int indice1 = grid.isContainedAt(vertices[tr.v[0]].p);
-	 int indice2 = grid.isContainedAt(vertices[tr.v[1]].p);
-	 int indice3 = grid.isContainedAt(vertices[tr.v[2]].p);
-
-	 if (indice1 == indice2 && indice1 == indice3) {
-		 continue;
-	 }
-
-	 Triangle trSimple = Triangle(newIndexRemapping[indice1],
-		 newIndexRemapping[indice2],
-		 newIndexRemapping[indice3]);
-	 simplifiedTriangles.push_back(trSimple);
- }
-
- // //Build the simplified mesh from the CORRECT lists
- simplified = Mesh(simplifiedVertices , simplifiedTriangles);
-
- // //recalculate the normals.
- simplified.centerAndScaleToUnit();
- simplified.computeVertexNormals();
- simplified.computeBoundingCube();
-}
 
 
 /************************************************************
@@ -145,33 +87,34 @@ void mainDraw( )
     else
         simplifiedDisplay? simplified.drawSmooth() : mesh.drawSmooth();
 
-    if (displayGrid)
-        grid.drawGrid();
-
-	switch (type)
-	{
-	case TRIANGLE:
-		//drawAxis(1);
-		simplified.draw();
-		
-		break;
-	default:
-		drawAxis(1);
-		break;
+	if (displayGrid) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clean the screen and the depth buffer
+		//glLoadIdentity();
+		simplified.drawSmooth();
+		grid.drawGrid();
 	}
-	return;
 
-    
+    return;
+
+    switch( type )
+    {
+    case TRIANGLE:
+        drawAxis(1);
+        break;
+    default:
+        drawAxis(1);
+        break;
+    }
 }
-void init(const char * fileName) {
-	mesh.loadMesh(fileName);
-	//attention! while loadMesh calls compute bounding box, it is not yet implemented!
-
-}
-
 
 void animate()
 {
+
+}
+
+void init(const char * fileName) {
+	mesh.loadMesh(fileName);
+	//attention! while loadMesh calls compute bounding box, it is not yet implemented!
 
 }
 
@@ -206,7 +149,7 @@ int main(int argc, char** argv)
     }
     glutInit (&argc, argv);
 
-    init(argc == 2 ? argv[1] : "dodge.obj");
+    init(argc == 2 ? argv[1] : "Boss_high.obj");
 
     // setup framebuffer
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH );
@@ -315,14 +258,14 @@ void keyboard(unsigned char key, int x, int y)
         }
         break;
 	case 'g':
-		simplifyMesh(r);
-		grid.drawGrid();
-		break;
-	case 'h':
-		simplifyMesh(r);
-		
-		simplified.draw();
-
+		if (displayGrid)
+			displayGrid = FALSE;
+		else
+		{
+			displayGrid = TRUE;
+			simplified = grid.simplifyMesh(mesh, r);
+			
+		}
 		break;
     case 27:     // ESC
         exit(0);

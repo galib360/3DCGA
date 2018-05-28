@@ -1,13 +1,13 @@
 #include "grid.h"
+#include "mesh.h"
+#include <vector>
 #ifdef WIN32
 #include <windows.h>
 #endif
 #include <GL/glut.h>
 
-
 int Grid::isContainedAt(const Vec3Df & pos){
     //returns index that contains the position
-	
 	float cubeLength = size / r;
 
 	Vec3Df v = pos - origin;
@@ -77,10 +77,9 @@ void Grid::drawCell(const Vec3Df & Min,const Vec3Df& Max) {
     for (unsigned short f=0;f<6;++f)
     {
         const unsigned short* face = faceCorners[f];
-		for (unsigned int v = 0; v < 4; v++) {
-			glColor3f(1.0f, 0.0f, 0.0f);
-			glVertex3f(corners[face[v]][0], corners[face[v]][1], corners[face[v]][2]);
-		}
+        for(unsigned int v = 0; v<4; v++)
+            glVertex3f(corners[face[v]][0], corners[face[v]][1], corners[face[v]][2]);
+
     }
     glEnd();
 
@@ -89,7 +88,7 @@ void Grid::drawCell(const Vec3Df & Min,const Vec3Df& Max) {
 void Grid::drawGrid(){
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glLineWidth(1.0f);
-    glColor3f(1.0f,0.0f,0.0f);
+    glColor3f(1.0f,1.0f,0.0f);
     glDisable(GL_LIGHTING);
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
@@ -126,6 +125,67 @@ void Grid::drawGrid(){
 	}
 
     glPopAttrib();
+}
+
+Mesh Grid::simplifyMesh(Mesh mesh, unsigned int r) {
+	//Create a grid that covers the bounding box of the mesh. 
+	//Be thorough and check all functions, as some of the calls below might NOT directly work and need to be written by you.
+	//It should be considered a guideline, NOT the solution.
+	//Also, use your graphics knowledge to draw for debugging! (e.g., draw the bounding box, the grid etc.)  
+	double offset = 0.01;
+	Vec3Df vecOffset = Vec3Df(offset, offset, offset);
+	Grid grid = Grid(mesh.bbOrigin - vecOffset, mesh.bbEdgeSize + 2 * offset, r);
+
+	//work with a local reference on the vertices and triangles
+	const std::vector<Vertex> & vertices = mesh.vertices;
+	const std::vector<Triangle> & triangles = mesh.triangles;
+
+	//   //Put all the vertices in the grid
+	grid.putVertices(mesh.vertices);
+
+	//	  //calculate a representative vertex for each grid cell
+	grid.computeRepresentatives();
+
+	// //Create a new list of vertices for the simplified model
+	// //What is the effect of the code below?
+	std::map<unsigned int, unsigned int > newIndexRemapping;
+	std::vector<Vertex> simplifiedVertices;
+
+	int count = 0;
+	for (RepresentativeList::iterator it = grid.representatives.begin(); it != grid.representatives.end(); it++, count++) {
+		newIndexRemapping[(*it).first] = count;
+		simplifiedVertices.push_back((*it).second);
+	}
+
+
+	// //Create a new list of triangles
+	// //This is NOT COMPLETE and you need to add code here
+	// //Think about what simplifiedVertices and newIndexRemapping contain
+	std::vector<Triangle> simplifiedTriangles;
+	for (int i = 0; i < triangles.size(); i++) {
+		Triangle tr = triangles[i];
+		int indice1 = grid.isContainedAt(vertices[tr.v[0]].p);
+		int indice2 = grid.isContainedAt(vertices[tr.v[1]].p);
+		int indice3 = grid.isContainedAt(vertices[tr.v[2]].p);
+
+		if (indice1 == indice2 && indice1 == indice3) {
+			continue;
+		}
+
+		Triangle trSimple = Triangle(newIndexRemapping[indice1],
+			newIndexRemapping[indice2],
+			newIndexRemapping[indice3]);
+		simplifiedTriangles.push_back(trSimple);
+	}
+
+	// //Build the simplified mesh from the CORRECT lists
+	Mesh simplified = Mesh(simplifiedVertices, simplifiedTriangles);
+
+	// //recalculate the normals.
+	simplified.centerAndScaleToUnit();
+	simplified.computeVertexNormals();
+	simplified.computeBoundingCube();
+	return simplified;
 }
 
 

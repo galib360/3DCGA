@@ -247,6 +247,7 @@ bool Mesh::loadMesh(const char * filename)
 
     centerAndScaleToUnit ();
     computeVertexNormals();
+	computeBoundingCube();
     return true;
 }
 

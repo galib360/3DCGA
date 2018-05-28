@@ -4,6 +4,7 @@
 #include "Vec3D.h"
 #include <vector>
 #include "Vertex.h"
+#include "mesh.h"
 #include <map>
 
 typedef std::map<unsigned, std::vector<Vec3Df> > CellContent;
@@ -37,6 +38,8 @@ public:
 	//draw all the cells
     void drawGrid();
 
+	Mesh simplifyMesh(Mesh mesh, unsigned int r);
+
 	//number of grid cells
     unsigned int r;
 	//position of the grid (min corner is at origin and its extent is defined by size).
@@ -50,7 +53,6 @@ public:
 	void putVertices(const std::vector<Vertex> & vertices);
     //find the index containing the given point, return -1 if it cannot be found
 	int isContainedAt(const Vec3Df & pos);
-
 
 	//for each cell, compute a representative point of all contained points
 	void computeRepresentatives();
