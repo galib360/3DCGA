@@ -26,9 +26,9 @@ float random(vec3 seed, int i){
 
 void main() {
 
-	const vec3 lightDir = normalize(lightPos - fragPos);
+	const vec3 lightDir = normalize(lightPos);
 	float visibility = 1.0;
-	float bias = 0.001;
+	float bias = 0.005;
 
 	vec2 poissonDisk[16] = vec2[]( 
 	   vec2( -0.94201624, -0.39906216 ), 
@@ -88,13 +88,15 @@ void main() {
 
 	// Output the normal as color
 	// remove the if else to remove spotlight
-	if ( distance < 0.5 ){
+	//if ( distance < 0.5 ){
 	//outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0); //without shadow
     //outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul; //with shadow only
-	outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul * vec4(texture(texLight, shadowMapCoord).xy, 0.0, 0.0); // with shadow and colored light texture ex5
+	outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility; //with shadow only, no spotlight
+	//outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * lightMul * vec4(texture(texLight, shadowMapCoord).xy, 0.0, 0.0); // with shadow and colored light texture ex5
+	//outColor = vec4(vec3(max(dot(fragNormal, lightDir), 0.0)), 1.0) * visibility * vec4(texture(texLight, shadowMapCoord).xy, 0.0, 0.0);
 	//outColor = vec4(texture(texLight, shadowMapCoord).xy, 0.0, 0.0);
-	}
-	else{
-		outColor = vec4(0,0,0,0);
-	}
+	//}
+	//else{
+	//	outColor = vec4(0,0,0,0);
+	//}
 }

@@ -263,10 +263,21 @@ int main() {
 	std::vector<tinyobj::material_t> materials;
 	std::string err;
 
-	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, "scene.obj")) {
+	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &err, "torus.obj")) {
 		std::cerr << err << std::endl;
 		return EXIT_FAILURE;
 	}
+
+	tinyobj::attrib_t attrib1;
+	std::vector<tinyobj::shape_t> shapes1;
+	std::vector<tinyobj::material_t> materials1;
+	std::string err1;
+
+	if (!tinyobj::LoadObj(&attrib1, &shapes1, &materials1, &err1, "scene.obj")) {
+		std::cerr << err << std::endl;
+		return EXIT_FAILURE;
+	}
+
 
 	std::vector<Vertex> vertices;
 
@@ -287,6 +298,28 @@ int main() {
 				attrib.normals[3 * index.normal_index + 0],
 				attrib.normals[3 * index.normal_index + 1],
 				attrib.normals[3 * index.normal_index + 2]
+			};
+
+			vertices.push_back(vertex);
+		}
+	}
+
+	for (const auto& shape : shapes1) {
+		for (const auto& index : shape.mesh.indices) {
+			Vertex vertex = {};
+
+			// Retrieve coordinates for vertex by index
+			vertex.pos = {
+				attrib1.vertices[3 * index.vertex_index + 0],
+				attrib1.vertices[3 * index.vertex_index + 1],
+				attrib1.vertices[3 * index.vertex_index + 2]
+			};
+
+			// Retrieve components of normal by index
+			vertex.normal = {
+				attrib1.normals[3 * index.normal_index + 0],
+				attrib1.normals[3 * index.normal_index + 1],
+				attrib1.normals[3 * index.normal_index + 2]
 			};
 
 			vertices.push_back(vertex);
@@ -351,7 +384,7 @@ int main() {
 
 	Camera lightCamera;
 	lightCamera.aspect = WIDTH / (float)HEIGHT;
-	lightCamera.position = glm::vec3(3.0f, 3.0f, 3.0f);
+	lightCamera.position = glm::vec3(10.0f, 10.0f, 10.0f);
 	lightCamera.forward = -lightCamera.position;
 
 	Camera cam = mainCamera;
@@ -382,7 +415,7 @@ int main() {
 
 			
 			// .... HERE YOU MUST ADD THE CORRECT UNIFORMS FOR RENDERING THE SHADOW MAP
-			glm::mat4 lightMVP = lightCamera.vpMatrix();
+			glm::mat4 lightMVP = lightCamera.voMatrix();
 			glUniformMatrix4fv(glGetUniformLocation(shadowProgram, "mvp"), 1, GL_FALSE, glm::value_ptr(lightMVP));
 
 
@@ -416,9 +449,10 @@ int main() {
 			0.0, 0.0, 0.5, 0.0,
 			0.5, 0.5, 0.5, 1.0
 		);
-		glm::mat4 depthMVP = lightCamera.vpMatrix();
+		glm::mat4 depthMVP = lightCamera.voMatrix();
 		glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
 
+		//glm::mat4 mvp = mainCamera.vpMatrix();
 		glm::mat4 mvp = cam.vpMatrix();
 
 		glUniformMatrix4fv(glGetUniformLocation(mainProgram, "mvp"), 1, GL_FALSE, glm::value_ptr(mvp));
@@ -426,7 +460,7 @@ int main() {
 		glUniformMatrix4fv(glGetUniformLocation(mainProgram, "lightMVP"), 1, GL_FALSE, glm::value_ptr(depthBiasMVP));
 
 		// Set view position
-		glUniform3fv(glGetUniformLocation(mainProgram, "viewPos"), 1, glm::value_ptr(cam.position));
+		glUniform3fv(glGetUniformLocation(mainProgram, "viewPos"), 1, glm::value_ptr(mainCamera.position));
 
 		// Expose current time in shader uniform
 		glUniform1f(glGetUniformLocation(mainProgram, "time"), static_cast<float>(glfwGetTime()));

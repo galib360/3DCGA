@@ -37,6 +37,14 @@ struct Camera
 	{
 		return glm::perspective(fov, aspect, near, far);
 	}
+	glm::mat4 oMatrix() const
+	{
+		return glm::ortho<float>(-30, 30, -30, 30, -30, 30);
+	}
+	glm::mat4 voMatrix() const
+	{
+		return oMatrix() * vMatrix();
+	}
 
 	glm::mat4 vpMatrix() const
 	{
